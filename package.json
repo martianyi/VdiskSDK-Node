@@ -1,0 +1,24 @@
+{
+  "name": "vdisksdk-node",
+  "version": "0.1.0",
+  "description": "node sdk for vdisk",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/martianyi/VdiskSDK-Node.git"
+  },
+  "keywords": [
+    "vdisk",
+    "sdk",
+    "node"
+  ],
+  "author": "Yi Kai <beliefs111@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/martianyi/VdiskSDK-Node/issues"
+  },
+  "homepage": "https://github.com/martianyi/VdiskSDK-Node#readme"
+}
