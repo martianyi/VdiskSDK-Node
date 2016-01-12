@@ -2,9 +2,20 @@
   "name": "vdisksdk-node",
   "version": "0.1.0",
   "description": "node sdk for vdisk",
-  "main": "index.js",
+  "main": "./dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
+  },
+  "babel": {
+    "presets": [
+      "es2015"
+    ]
+  },
+  "devDependencies": {
+    "babel-preset-es2015": "^6.3.13",
+    "gulp": "^3.9.0",
+    "gulp-babel": "^6.1.1",
+    "gulp-sourcemaps": "^1.6.0"
   },
   "repository": {
     "type": "git",
@@ -20,5 +31,8 @@
   "bugs": {
     "url": "https://github.com/martianyi/VdiskSDK-Node/issues"
   },
-  "homepage": "https://github.com/martianyi/VdiskSDK-Node#readme"
+  "homepage": "https://github.com/martianyi/VdiskSDK-Node#readme",
+  "dependencies": {
+    "request": "^2.67.0"
+  }
 }
