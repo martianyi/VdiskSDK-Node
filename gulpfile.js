@@ -10,7 +10,7 @@ gulp.task("babel", function () {
         .pipe(sourcemaps.init())
         .pipe(babel())//babel相关配置详见package.json中babel选项
         .pipe(sourcemaps.write("."))
-        .pipe(gulp.dest("./dist"));
+        .pipe(gulp.dest("."));
 });
 
 gulp.task("default", ['babel']);

@@ -200,6 +200,14 @@ var Client = function () {
                 }
             });
         }
+
+        /**
+         * Delta
+         * @param access_token
+         * @param cursor
+         * @param cb
+         */
+
     }, {
         key: "delta",
         value: function delta(access_token, cursor, cb) {

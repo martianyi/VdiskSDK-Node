@@ -2,7 +2,7 @@
   "name": "vdisksdk-node",
   "version": "0.1.0",
   "description": "node sdk for vdisk",
-  "main": "./dist/index.js",
+  "main": "index.js",
   "scripts": {
     "test": "mocha"
   },
