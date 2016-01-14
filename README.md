@@ -9,7 +9,7 @@ http://vdisk.weibo.com/developers/index.php?module=api&action=apiinfo
 Get the authorization url.
 
 ```javascript
-var OAuth2 = require("../dist/index").OAuth2;
+var OAuth2 = require("vdisksdk-node").OAuth2;
 var oauth = new OAuth2(WEIPAN_APPKEY,WEIPAN_APPSECRET,WEIPAN_CALLBACK)
 var url = oauth.authorize()
 ```

@@ -1,5 +1,6 @@
 "use strict";
-const querystring = require("querystring");
+const fs = require('fs');
+const querystring = require('querystring');
 const request = require('request');
 
 /**
@@ -133,6 +134,10 @@ class Client {
      * @param cb
      */
     metadata(access_token, path, cb) {
+        if (path instanceof Function) {
+            cb = path; //未传path时,path默认值为""
+            path = "";
+        }
         request({
             url: this.API_URL + 'metadata/' + this.root + '/' + path,
             headers: {
@@ -170,12 +175,140 @@ class Client {
             param['cursor'] = cursor;
             url += '?' + querystring.stringify(param);
         }
-        console.log(url);
         request.post({
             url: url,
             headers: {
                 'Authorization': 'OAuth2 ' + access_token
             }
+        }, function (err, resp, body) {
+            if (err) return cb(new Error('请求失败: ' + err));
+            // handle server errors
+            if (resp.statusCode >= 500 && resp.statusCode <= 599) {
+                return cb(new Error('服务器内部错误: (' + resp.statusCode + ') ' + body));
+            }
+            var response = JSON.parse(body);
+            if (response.error_code) {
+                return cb(new Error(`请求失败: ${response.error}`))
+            } else {
+                return cb(null, response);
+            }
+        })
+    }
+
+    /**
+     * Get files
+     * @param access_token
+     * @param path
+     * @param rev
+     * @param cb
+     */
+    files({access_token, path='', rev = ''}={}, cb) {
+        let param = {},
+            url = this.API_URL + 'files/' + this.root + "/" + path;
+        if (rev.length > 0) {
+            param['rev'] = rev;
+            url += '?' + querystring.stringify(param);
+        }
+        request({
+            url: url,
+            headers: {
+                'Authorization': 'OAuth2 ' + access_token
+            }
+        }, function (err, resp, body) {
+            if (err) return cb(new Error('请求失败: ' + err));
+            // handle server errors
+            if (resp.statusCode >= 500 && resp.statusCode <= 599) {
+                return cb(new Error('服务器内部错误: (' + resp.statusCode + ') ' + body));
+            }
+            var response = JSON.parse(body);
+            if (response.error_code) {
+                return cb(new Error(`请求失败: ${response.error}`))
+            } else {
+                return cb(null, response);
+            }
+        })
+    }
+
+    /**
+     * Save files
+     * @param access_token
+     * @param path
+     * @param files
+     * @param overwrite
+     * @param sha1
+     * @param size
+     * @param parent_rev
+     * @param cb
+     */
+    saveFiles({access_token,path="",files,overwrite = "true",sha1 = "",size = "", parent_rev = ""}={}, cb) {
+        let param = {
+            access_token: access_token,
+            overwrite: overwrite
+        };
+        if (sha1.length > 0) param["sha1"] = sha1;
+        if (size.length > 0) param["size"] = size;
+        if (parent_rev.length > 0) param["parent_rev"] = parent_rev;
+
+        let queries = querystring.stringify(param);
+
+        let url = this.CONTENT_SAFE_URL + 'files/' + this.root + "/" + path + "?" + queries;
+
+        let formData = {
+            file: fs.createReadStream(files)
+        };
+
+        request.post({
+            rejectUnauthorized: false,
+            url: url,
+            formData: formData
+        }, function (err, resp, body) {
+            if (err) return cb(new Error('请求失败: ' + err));
+            // handle server errors
+            if (resp.statusCode >= 500 && resp.statusCode <= 599) {
+                return cb(new Error('服务器内部错误: (' + resp.statusCode + ') ' + body));
+            }
+            var response = JSON.parse(body);
+            if (response.error_code) {
+                return cb(new Error(`请求失败: ${response.error}`))
+            } else {
+                return cb(null, response);
+            }
+        });
+    }
+
+    /**
+     * Update files
+     * @param access_token
+     * @param path
+     * @param files
+     * @param overwrite
+     * @param sha1
+     * @param size
+     * @param parent_rev
+     * @param cb
+     */
+    updateFiles({access_token,path,files,overwrite = "true",sha1 = "",size = "", parent_rev = ""}={}, cb) {
+
+        let param = {
+            "access_token": access_token,
+            "overwrite": overwrite
+        };
+        if (sha1.length > 0)  param["sha1"] = sha1;
+        if (size.length > 0) param["size"] = size;
+        if (parent_rev.length > 0) param["parent_rev"] = parent_rev;
+
+        let host = this.UPLOAD_HOST,
+            api = '/2/files_put/' + this.root + "/" + path + "?" + querystring.stringify(param);
+        let url = 'http://' + host + api;
+
+        let formData = {
+            file: fs.createReadStream(files)
+        };
+
+        request.put({
+            rejectUnauthorized: false,
+            url: url,
+            formData: formData
         }, function (err, resp, body) {
             if (err) return cb(new Error('请求失败: ' + err));
             // handle server errors

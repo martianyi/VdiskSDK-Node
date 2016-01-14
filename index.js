@@ -4,7 +4,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var querystring = require("querystring");
+var fs = require('fs');
+var querystring = require('querystring');
 var request = require('request');
 
 /**
@@ -40,7 +41,7 @@ var OAuth2 = function () {
      */
 
     _createClass(OAuth2, [{
-        key: "authorize",
+        key: 'authorize',
         value: function authorize() {
             var _ref = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -72,7 +73,7 @@ var OAuth2 = function () {
          */
 
     }, {
-        key: "accessToken",
+        key: 'accessToken',
         value: function accessToken() {
             var _ref2 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
@@ -107,7 +108,7 @@ var OAuth2 = function () {
                 }
                 var response = JSON.parse(body);
                 if (response.code) {
-                    return cb(new Error("请求失败: (" + response.code + ") " + response.msg));
+                    return cb(new Error('请求失败: (' + response.code + ') ' + response.msg));
                 } else {
                     return cb(null, response);
                 }
@@ -149,7 +150,7 @@ var Client = function () {
      */
 
     _createClass(Client, [{
-        key: "accountInfo",
+        key: 'accountInfo',
         value: function accountInfo(access_token, cb) {
             request({
                 url: this.API_URL + 'account/info',
@@ -164,7 +165,7 @@ var Client = function () {
                 }
                 var response = JSON.parse(body);
                 if (response.code) {
-                    return cb(new Error("请求失败: (" + response.code + ") " + response.msg));
+                    return cb(new Error('请求失败: (' + response.code + ') ' + response.msg));
                 } else {
                     return cb(null, response);
                 }
@@ -179,8 +180,12 @@ var Client = function () {
          */
 
     }, {
-        key: "metadata",
+        key: 'metadata',
         value: function metadata(access_token, path, cb) {
+            if (path instanceof Function) {
+                cb = path; //未传path时,path默认值为""
+                path = "";
+            }
             request({
                 url: this.API_URL + 'metadata/' + this.root + '/' + path,
                 headers: {
@@ -194,7 +199,7 @@ var Client = function () {
                 }
                 var response = JSON.parse(body);
                 if (response.error_code) {
-                    return cb(new Error("请求失败: " + response.error));
+                    return cb(new Error('请求失败: ' + response.error));
                 } else {
                     return cb(null, response);
                 }
@@ -209,7 +214,7 @@ var Client = function () {
          */
 
     }, {
-        key: "delta",
+        key: 'delta',
         value: function delta(access_token, cursor, cb) {
             if (cursor instanceof Function) {
                 cb = cursor; //未传cursor时,cursor默认值为""
@@ -221,7 +226,6 @@ var Client = function () {
                 param['cursor'] = cursor;
                 url += '?' + querystring.stringify(param);
             }
-            console.log(url);
             request.post({
                 url: url,
                 headers: {
@@ -235,7 +239,171 @@ var Client = function () {
                 }
                 var response = JSON.parse(body);
                 if (response.error_code) {
-                    return cb(new Error("请求失败: " + response.error));
+                    return cb(new Error('请求失败: ' + response.error));
+                } else {
+                    return cb(null, response);
+                }
+            });
+        }
+
+        /**
+         * Get files
+         * @param access_token
+         * @param path
+         * @param rev
+         * @param cb
+         */
+
+    }, {
+        key: 'files',
+        value: function files() {
+            var _ref3 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+            var access_token = _ref3.access_token;
+            var _ref3$path = _ref3.path;
+            var path = _ref3$path === undefined ? '' : _ref3$path;
+            var _ref3$rev = _ref3.rev;
+            var rev = _ref3$rev === undefined ? '' : _ref3$rev;
+            var cb = arguments[1];
+
+            var param = {},
+                url = this.API_URL + 'files/' + this.root + "/" + path;
+            if (rev.length > 0) {
+                param['rev'] = rev;
+                url += '?' + querystring.stringify(param);
+            }
+            request({
+                url: url,
+                headers: {
+                    'Authorization': 'OAuth2 ' + access_token
+                }
+            }, function (err, resp, body) {
+                if (err) return cb(new Error('请求失败: ' + err));
+                // handle server errors
+                if (resp.statusCode >= 500 && resp.statusCode <= 599) {
+                    return cb(new Error('服务器内部错误: (' + resp.statusCode + ') ' + body));
+                }
+                var response = JSON.parse(body);
+                if (response.error_code) {
+                    return cb(new Error('请求失败: ' + response.error));
+                } else {
+                    return cb(null, response);
+                }
+            });
+        }
+
+        /**
+         * Save files
+         * @param access_token
+         * @param path
+         * @param files
+         * @param overwrite
+         * @param sha1
+         * @param size
+         * @param parent_rev
+         * @param cb
+         */
+
+    }, {
+        key: 'saveFiles',
+        value: function saveFiles() {
+            var _ref4 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+            var access_token = _ref4.access_token;
+            var _ref4$path = _ref4.path;
+            var path = _ref4$path === undefined ? "" : _ref4$path;
+            var files = _ref4.files;
+            var _ref4$overwrite = _ref4.overwrite;
+            var overwrite = _ref4$overwrite === undefined ? "true" : _ref4$overwrite;
+            var _ref4$sha = _ref4.sha1;
+            var sha1 = _ref4$sha === undefined ? "" : _ref4$sha;
+            var _ref4$size = _ref4.size;
+            var size = _ref4$size === undefined ? "" : _ref4$size;
+            var _ref4$parent_rev = _ref4.parent_rev;
+            var parent_rev = _ref4$parent_rev === undefined ? "" : _ref4$parent_rev;
+            var cb = arguments[1];
+
+            var param = {
+                access_token: access_token,
+                overwrite: overwrite
+            };
+            if (sha1.length > 0) param["sha1"] = sha1;
+            if (size.length > 0) param["size"] = size;
+            if (parent_rev.length > 0) param["parent_rev"] = parent_rev;
+
+            var queries = querystring.stringify(param);
+
+            var url = this.CONTENT_SAFE_URL + 'files/' + this.root + "/" + path + "?" + queries;
+
+            var formData = {
+                file: fs.createReadStream(files)
+            };
+
+            request.post({
+                rejectUnauthorized: false,
+                url: url,
+                formData: formData
+            }, function (err, resp, body) {
+                if (err) return cb(new Error('请求失败: ' + err));
+                // handle server errors
+                if (resp.statusCode >= 500 && resp.statusCode <= 599) {
+                    return cb(new Error('服务器内部错误: (' + resp.statusCode + ') ' + body));
+                }
+                var response = JSON.parse(body);
+                if (response.error_code) {
+                    return cb(new Error('请求失败: ' + response.error));
+                } else {
+                    return cb(null, response);
+                }
+            });
+        }
+    }, {
+        key: 'updateFiles',
+        value: function updateFiles() {
+            var _ref5 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+            var access_token = _ref5.access_token;
+            var path = _ref5.path;
+            var files = _ref5.files;
+            var _ref5$overwrite = _ref5.overwrite;
+            var overwrite = _ref5$overwrite === undefined ? "true" : _ref5$overwrite;
+            var _ref5$sha = _ref5.sha1;
+            var sha1 = _ref5$sha === undefined ? "" : _ref5$sha;
+            var _ref5$size = _ref5.size;
+            var size = _ref5$size === undefined ? "" : _ref5$size;
+            var _ref5$parent_rev = _ref5.parent_rev;
+            var parent_rev = _ref5$parent_rev === undefined ? "" : _ref5$parent_rev;
+            var cb = arguments[1];
+
+            var param = {
+                "access_token": access_token,
+                "overwrite": overwrite
+            };
+            if (sha1.length > 0) param["sha1"] = sha1;
+            if (size.length > 0) param["size"] = size;
+            if (parent_rev.length > 0) param["parent_rev"] = parent_rev;
+
+            var host = this.UPLOAD_HOST,
+                api = '/2/files_put/' + this.root + "/" + path + "?" + querystring.stringify(param);
+            var url = 'http://' + host + api;
+
+            var formData = {
+                file: fs.createReadStream(files)
+            };
+
+            request.put({
+                rejectUnauthorized: false,
+                url: url,
+                formData: formData
+            }, function (err, resp, body) {
+                if (err) return cb(new Error('请求失败: ' + err));
+                // handle server errors
+                if (resp.statusCode >= 500 && resp.statusCode <= 599) {
+                    return cb(new Error('服务器内部错误: (' + resp.statusCode + ') ' + body));
+                }
+                var response = JSON.parse(body);
+                if (response.error_code) {
+                    return cb(new Error('请求失败: ' + response.error));
                 } else {
                     return cb(null, response);
                 }
