@@ -133,11 +133,7 @@ class Client {
      * @param path
      * @param cb
      */
-    metadata(access_token, path, cb) {
-        if (path instanceof Function) {
-            cb = path; //未传path时,path默认值为""
-            path = "";
-        }
+    metadata({access_token, path=''}={}, cb) {
         request({
             url: this.API_URL + 'metadata/' + this.root + '/' + path,
             headers: {
@@ -164,11 +160,7 @@ class Client {
      * @param cursor
      * @param cb
      */
-    delta(access_token, cursor, cb) {
-        if (cursor instanceof Function) {
-            cb = cursor; //未传cursor时,cursor默认值为""
-            cursor = "";
-        }
+    delta({access_token, cursor=''}={}, cb) {
         let param = {},
             url = this.API_URL + 'delta/' + this.root;
         if (cursor.length > 0) {
@@ -211,6 +203,27 @@ class Client {
         }
         request({
             url: url,
+            headers: {
+                'Authorization': 'OAuth2 ' + access_token
+            }
+        }, function (err, resp, body) {
+            if (err) return cb(new Error('请求失败: ' + err));
+            // handle server errors
+            if (resp.statusCode >= 500 && resp.statusCode <= 599) {
+                return cb(new Error('服务器内部错误: (' + resp.statusCode + ') ' + body));
+            }
+            var response = JSON.parse(body);
+            if (response.error_code) {
+                return cb(new Error(`请求失败: ${response.error}`))
+            } else {
+                return cb(null, response);
+            }
+        })
+    }
+
+    revisions({access_token,path}={}, cb) {
+        request({
+            url: this.API_URL + 'revisions/' + this.root + "/" + path,
             headers: {
                 'Authorization': 'OAuth2 ' + access_token
             }

@@ -181,11 +181,14 @@ var Client = function () {
 
     }, {
         key: 'metadata',
-        value: function metadata(access_token, path, cb) {
-            if (path instanceof Function) {
-                cb = path; //未传path时,path默认值为""
-                path = "";
-            }
+        value: function metadata() {
+            var _ref3 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+            var access_token = _ref3.access_token;
+            var _ref3$path = _ref3.path;
+            var path = _ref3$path === undefined ? '' : _ref3$path;
+            var cb = arguments[1];
+
             request({
                 url: this.API_URL + 'metadata/' + this.root + '/' + path,
                 headers: {
@@ -215,11 +218,14 @@ var Client = function () {
 
     }, {
         key: 'delta',
-        value: function delta(access_token, cursor, cb) {
-            if (cursor instanceof Function) {
-                cb = cursor; //未传cursor时,cursor默认值为""
-                cursor = "";
-            }
+        value: function delta() {
+            var _ref4 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+            var access_token = _ref4.access_token;
+            var _ref4$cursor = _ref4.cursor;
+            var cursor = _ref4$cursor === undefined ? '' : _ref4$cursor;
+            var cb = arguments[1];
+
             var param = {},
                 url = this.API_URL + 'delta/' + this.root;
             if (cursor.length > 0) {
@@ -257,13 +263,13 @@ var Client = function () {
     }, {
         key: 'files',
         value: function files() {
-            var _ref3 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+            var _ref5 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
-            var access_token = _ref3.access_token;
-            var _ref3$path = _ref3.path;
-            var path = _ref3$path === undefined ? '' : _ref3$path;
-            var _ref3$rev = _ref3.rev;
-            var rev = _ref3$rev === undefined ? '' : _ref3$rev;
+            var access_token = _ref5.access_token;
+            var _ref5$path = _ref5.path;
+            var path = _ref5$path === undefined ? '' : _ref5$path;
+            var _ref5$rev = _ref5.rev;
+            var rev = _ref5$rev === undefined ? '' : _ref5$rev;
             var cb = arguments[1];
 
             var param = {},
@@ -274,6 +280,34 @@ var Client = function () {
             }
             request({
                 url: url,
+                headers: {
+                    'Authorization': 'OAuth2 ' + access_token
+                }
+            }, function (err, resp, body) {
+                if (err) return cb(new Error('请求失败: ' + err));
+                // handle server errors
+                if (resp.statusCode >= 500 && resp.statusCode <= 599) {
+                    return cb(new Error('服务器内部错误: (' + resp.statusCode + ') ' + body));
+                }
+                var response = JSON.parse(body);
+                if (response.error_code) {
+                    return cb(new Error('请求失败: ' + response.error));
+                } else {
+                    return cb(null, response);
+                }
+            });
+        }
+    }, {
+        key: 'revisions',
+        value: function revisions() {
+            var _ref6 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+            var access_token = _ref6.access_token;
+            var path = _ref6.path;
+            var cb = arguments[1];
+
+            request({
+                url: this.API_URL + 'revisions/' + this.root + "/" + path,
                 headers: {
                     'Authorization': 'OAuth2 ' + access_token
                 }
@@ -307,20 +341,20 @@ var Client = function () {
     }, {
         key: 'saveFiles',
         value: function saveFiles() {
-            var _ref4 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+            var _ref7 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
-            var access_token = _ref4.access_token;
-            var _ref4$path = _ref4.path;
-            var path = _ref4$path === undefined ? "" : _ref4$path;
-            var files = _ref4.files;
-            var _ref4$overwrite = _ref4.overwrite;
-            var overwrite = _ref4$overwrite === undefined ? "true" : _ref4$overwrite;
-            var _ref4$sha = _ref4.sha1;
-            var sha1 = _ref4$sha === undefined ? "" : _ref4$sha;
-            var _ref4$size = _ref4.size;
-            var size = _ref4$size === undefined ? "" : _ref4$size;
-            var _ref4$parent_rev = _ref4.parent_rev;
-            var parent_rev = _ref4$parent_rev === undefined ? "" : _ref4$parent_rev;
+            var access_token = _ref7.access_token;
+            var _ref7$path = _ref7.path;
+            var path = _ref7$path === undefined ? "" : _ref7$path;
+            var files = _ref7.files;
+            var _ref7$overwrite = _ref7.overwrite;
+            var overwrite = _ref7$overwrite === undefined ? "true" : _ref7$overwrite;
+            var _ref7$sha = _ref7.sha1;
+            var sha1 = _ref7$sha === undefined ? "" : _ref7$sha;
+            var _ref7$size = _ref7.size;
+            var size = _ref7$size === undefined ? "" : _ref7$size;
+            var _ref7$parent_rev = _ref7.parent_rev;
+            var parent_rev = _ref7$parent_rev === undefined ? "" : _ref7$parent_rev;
             var cb = arguments[1];
 
             var param = {
@@ -357,22 +391,35 @@ var Client = function () {
                 }
             });
         }
+
+        /**
+         * Update files
+         * @param access_token
+         * @param path
+         * @param files
+         * @param overwrite
+         * @param sha1
+         * @param size
+         * @param parent_rev
+         * @param cb
+         */
+
     }, {
         key: 'updateFiles',
         value: function updateFiles() {
-            var _ref5 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+            var _ref8 = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
-            var access_token = _ref5.access_token;
-            var path = _ref5.path;
-            var files = _ref5.files;
-            var _ref5$overwrite = _ref5.overwrite;
-            var overwrite = _ref5$overwrite === undefined ? "true" : _ref5$overwrite;
-            var _ref5$sha = _ref5.sha1;
-            var sha1 = _ref5$sha === undefined ? "" : _ref5$sha;
-            var _ref5$size = _ref5.size;
-            var size = _ref5$size === undefined ? "" : _ref5$size;
-            var _ref5$parent_rev = _ref5.parent_rev;
-            var parent_rev = _ref5$parent_rev === undefined ? "" : _ref5$parent_rev;
+            var access_token = _ref8.access_token;
+            var path = _ref8.path;
+            var files = _ref8.files;
+            var _ref8$overwrite = _ref8.overwrite;
+            var overwrite = _ref8$overwrite === undefined ? "true" : _ref8$overwrite;
+            var _ref8$sha = _ref8.sha1;
+            var sha1 = _ref8$sha === undefined ? "" : _ref8$sha;
+            var _ref8$size = _ref8.size;
+            var size = _ref8$size === undefined ? "" : _ref8$size;
+            var _ref8$parent_rev = _ref8.parent_rev;
+            var parent_rev = _ref8$parent_rev === undefined ? "" : _ref8$parent_rev;
             var cb = arguments[1];
 
             var param = {
