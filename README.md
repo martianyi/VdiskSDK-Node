@@ -45,7 +45,7 @@ oauth.accessToken({grant_type:"refresh_token",refresh_token: "347ee06666gE5HW3ma
 ### Client 微盘接口封装
 
 ```javascript
-var Client = require("../index").Client;
+var Client = require("vdisksdk-node").Client;
 var client = new Client();
 ```
 
