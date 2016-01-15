@@ -6,16 +6,111 @@ http://vdisk.weibo.com/developers/index.php?module=api&action=apiinfo
 
 ## Usage
 
-Install
+### Install 安装
 
-`npm install vdisksdk-node`
+`npm install vdisksdk-node --save`
 
-Get the authorization url.
+### OAuth2 授权接口封装
 
 ```javascript
 var OAuth2 = require("vdisksdk-node").OAuth2;
 var oauth = new OAuth2(WEIPAN_APPKEY,WEIPAN_APPSECRET,WEIPAN_CALLBACK)
+```
+
+Get the authorization url
+
+```javascript
 var url = oauth.authorize()
+```
+
+Get access token
+```javascript
+oauth.accessToken({code:"b0841e108f70acc530aefeee7d0daf14"},function(err, resp){
+    if(err) throw(err);
+    console.log(resp);
+})
+```
+
+Get refresh token
+```javascript
+oauth.accessToken({grant_type:"refresh_token",refresh_token: "347ee06666gE5HW3madls3FeZm7e0141"},function(err, resp){
+    if(err){
+        throw(err)
+    }
+    console.log(resp);
+    done();
+})
+```
+
+### Client 微盘接口封装
+
+```javascript
+var Client = require("../index").Client;
+var client = new Client();
+```
+
+Get account info
+```javascript
+client.accountInfo(accessToken, function (err, resp) {
+    if (err) {
+        throw(err)
+    }
+    console.log(resp);
+})
+```
+
+Get metadata 获取文件和目录信息
+```javascript
+client.metadata({access_token: accessToken}, function (err, resp) {
+    if (err) {
+        throw(err)
+    }
+    console.log(resp);
+})
+```
+
+delta
+```javascript
+client.delta({access_token: accessToken}, function (err, resp) {
+    if (err) {
+        throw(err)
+    }
+    console.log(resp);
+})
+```
+
+files
+```javascript
+client.files({access_token: accessToken, path: 'test/test.txt'}, function (err, resp) {
+    if (err) {
+        throw(err)
+    }
+    console.log(resp);
+})
+```
+
+revisions 获得文件的历史版本
+```javascript
+client.revisions({access_token: accessToken, path: 'test/test.txt'}, function (err, resp) {
+    if (err) {
+        throw(err)
+    }
+    console.log(resp);
+})
+```
+
+Save files
+```javascript
+client.saveFiles({
+    access_token: accessToken,
+    path: 'test/test.txt',
+    files: __dirname + '/file.txt'
+}, function (err, resp) {
+    if (err) {
+        throw(err)
+    }
+    console.log(resp);
+})
 ```
 
 ## API
