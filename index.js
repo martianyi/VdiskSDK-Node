@@ -16,8 +16,8 @@ var OAuth2 = function () {
 
     /**
      * Constructor
-     * @param app_key
-     * @param app_secret
+     * @param app_key 申请应用时分配的AppKey
+     * @param app_secret 申请应用时分配的AppSecret
      * @param call_back_url
      */
 
@@ -34,9 +34,9 @@ var OAuth2 = function () {
 
     /**
      * Get the authorization url
-     * @param response_type
-     * @param display: default/mobile/popup
-     * @param state
+     * @param response_type 返回类型，支持code、token，默认值为code
+     * @param display 授权页面的终端类型 default/mobile/popup
+     * @param state 用于保持请求和回调的状态，在回调时，会在Query Parameter中回传该参数
      * @returns {string}
      */
 
@@ -66,10 +66,10 @@ var OAuth2 = function () {
 
         /**
          * Get access token
-         * @param grant_type  authorization_code/refresh_token
-         * @param code
-         * @param refresh_token
-         * @param cb 回调函数
+         * @param grant_type  请求的类型 authorization_code/refresh_token
+         * @param code grant_type为authorization_code时传入
+         * @param refresh_token grant_type为refresh_token时传入
+         * @param cb 回调函数，接收error和response两个参数
          */
 
     }, {
@@ -145,8 +145,8 @@ var Client = function () {
 
     /**
      * Get account info
-     * @param access_token
-     * @param cb
+     * @param access_token 接口获取授权后的access token
+     * @param cb 回调函数，接收error和response两个参数
      */
 
     _createClass(Client, [{
